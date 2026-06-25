@@ -219,8 +219,13 @@ def upload_file():
     if 'files' not in request.files:
         return jsonify({"success": False, "error": "未选择文件"}), 400
     files = request.files.getlist('files')
+    # 从表单读取自定义名称和标签
+    custom_title = request.form.get('title', '').strip()
+    custom_tags = request.form.get('tags', '').strip()
+    custom_desc = request.form.get('description', '').strip()
     resources = load_resources()
     uploaded = []
+    single_file = len(files) == 1
     for file in files:
         if file.filename == '':
             continue
@@ -233,17 +238,19 @@ def upload_file():
         file.save(os.path.join(UPLOAD_FOLDER, safe_name))
         file_size = os.path.getsize(os.path.join(UPLOAD_FOLDER, safe_name))
         category = get_file_category(ext)
+        # 单个文件时使用自定义名称，多文件时用文件名
+        title = custom_title if single_file and custom_title else original_name.rsplit('.', 1)[0]
         resource = {
             "id": str(uuid.uuid4()),
-            "title": original_name.rsplit('.', 1)[0],
+            "title": title,
             "filename": safe_name,
             "original_name": original_name,
             "url": f"/api/file/{safe_name}",
             "file_size": file_size,
             "file_type": category,
             "file_ext": ext,
-            "description": "",
-            "tags": "",
+            "description": custom_desc if single_file else "",
+            "tags": custom_tags,
             "resource_type": "file",
             "created_at": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         }

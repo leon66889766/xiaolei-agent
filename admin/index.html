@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -162,19 +162,19 @@ table tr:hover { background: rgba(255,255,255,0.03); }
   <div class="login-card">
     <h1>小雷没摸鱼agent</h1>
     <p class="subtitle">管理后台 - 资源管理</p>
-    <div class="form-group"><label>管理员账号</label><input type="text" id="loginUsername" placeholder="请输入管理员账号" value="admin"></div>
-    <div class="form-group"><label>管理员密码</label><input type="password" id="loginPassword" placeholder="请输入密码" value="admin123"></div>
-    <button class="btn-primary" id="loginBtn" onclick="login()">登 录</button>
+    <div class="form-group"><label>管理员账�?/label><input type="text" id="loginUsername" placeholder="请输入管理员账号" value="admin"></div>
+    <div class="form-group"><label>管理员密�?/label><input type="password" id="loginPassword" placeholder="请输入密�? value="admin123"></div>
+    <button class="btn-primary" id="loginBtn" onclick="login()">�?�?/button>
     <p class="error-msg" id="loginError"></p>
   </div>
 </div>
 
 <div class="admin-container" id="adminPage">
   <div class="admin-header">
-    <h1>⚡ 小雷没摸鱼agent - 管理后台</h1>
+    <h1>�?小雷没摸鱼agent - 管理后台</h1>
     <div class="header-right">
       <span class="username" id="currentUser"></span>
-      <button class="btn-logout" onclick="logout()">退出登录</button>
+      <button class="btn-logout" onclick="logout()">退出登�?/button>
     </div>
   </div>
   <div class="admin-main">
@@ -182,10 +182,13 @@ table tr:hover { background: rgba(255,255,255,0.03); }
     <div class="panels">
       <div class="panel">
         <h3>📁 上传文件</h3>
+        <label>资源名称（可选，多文件时使用文件名）</label><input type="text" id="uploadTitle" placeholder="给资源起个名字，方便搜索">
+        <label>标签（可选，逗号分隔，便于检索）</label><input type="text" id="uploadTags" placeholder="例如：logo, 品牌, VI">
+        <label>描述（可选）</label><textarea id="uploadDesc" placeholder="简要描述资源内容" style="min-height:48px"></textarea>
         <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
           <div class="upload-icon">📤</div>
-          <p>拖拽文件到此处 或 点击选择文件</p>
-          <p style="font-size:11px;margin-top:4px;color:rgba(255,255,255,0.3)">支持图片、视频、音频、文档、压缩包等</p>
+          <p>拖拽文件到此�?�?点击选择文件</p>
+          <p style="font-size:11px;margin-top:4px;color:rgba(255,255,255,0.3)">支持图片、视频、音频、文档、压缩包�?/p>
         </div>
         <input type="file" id="fileInput" multiple hidden accept=".jpg,.jpeg,.png,.gif,.bmp,.webp,.svg,.mp4,.avi,.mov,.mkv,.webm,.mp3,.wav,.flac,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,.rar,.7z">
         <div class="upload-result" id="uploadResult"></div>
@@ -195,7 +198,7 @@ table tr:hover { background: rgba(255,255,255,0.03); }
         <label>链接标题</label><input type="text" id="linkTitle" placeholder="资源标题">
         <label>链接地址</label><input type="text" id="linkUrl" placeholder="https://...">
         <label>描述（可选）</label><textarea id="linkDesc" placeholder="资源描述"></textarea>
-        <label>标签（可选，逗号分隔）</label><input type="text" id="linkTags" placeholder="标签1, 标签2">
+        <label>标签（可选，逗号分隔�?/label><input type="text" id="linkTags" placeholder="标签1, 标签2">
         <button class="btn-sm" onclick="addLink()">添加链接</button>
         <div id="linkResult" style="margin-top:8px;font-size:12px;"></div>
       </div>
@@ -211,7 +214,7 @@ table tr:hover { background: rgba(255,255,255,0.03); }
           <option value="video">视频</option>
           <option value="audio">音频</option>
           <option value="document">文档</option>
-          <option value="archive">压缩包</option>
+          <option value="archive">压缩�?/option>
           <option value="link">链接</option>
         </select>
         <button class="btn-sm" onclick="loadResources()">刷新</button>
@@ -220,11 +223,11 @@ table tr:hover { background: rgba(255,255,255,0.03); }
         <table>
           <thead>
             <tr>
-              <th>类型</th><th>标题</th><th>文件名/链接</th><th>大小</th><th>标签</th><th>上传时间</th><th>操作</th>
+              <th>类型</th><th>标题</th><th>文件�?链接</th><th>大小</th><th>标签</th><th>上传时间</th><th>操作</th>
             </tr>
           </thead>
           <tbody id="resourceTableBody">
-            <tr><td colspan="7" class="empty-state">加载中...</td></tr>
+            <tr><td colspan="7" class="empty-state">加载�?..</td></tr>
           </tbody>
         </table>
       </div>
@@ -233,7 +236,7 @@ table tr:hover { background: rgba(255,255,255,0.03); }
 </div>
 
 <script>
-const API_BASE = 'http://localhost:5000';
+const API_BASE = 'https://view-vary-thick-transit.trycloudflare.com';
 let token = localStorage.getItem('xiaolei_token');
 
 if (token) {
@@ -254,7 +257,7 @@ async function login() {
   const username = document.getElementById('loginUsername').value.trim();
   const password = document.getElementById('loginPassword').value.trim();
   if (!username || !password) { document.getElementById('loginError').textContent = '请输入账号和密码'; return; }
-  btn.disabled = true; btn.textContent = '登录中...';
+  btn.disabled = true; btn.textContent = '登录�?..';
   try {
     const resp = await fetch(`${API_BASE}/api/admin/login`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -270,9 +273,9 @@ async function login() {
       document.getElementById('loginError').textContent = data.error || '登录失败';
     }
   } catch(e) {
-    document.getElementById('loginError').textContent = '连接服务器失败: ' + e.message;
+    document.getElementById('loginError').textContent = '连接服务器失�? ' + e.message;
   }
-  btn.disabled = false; btn.textContent = '登 录';
+  btn.disabled = false; btn.textContent = '�?�?;
 }
 
 function logout() {
@@ -305,9 +308,15 @@ function setupDragDrop() {
 async function uploadFiles(files) {
   if (!files.length) return;
   const resultEl = document.getElementById('uploadResult');
-  resultEl.textContent = '上传中...';
+  resultEl.textContent = '上传�?..';
   const formData = new FormData();
   for (let f of files) formData.append('files', f);
+  const uploadTitle = document.getElementById('uploadTitle').value.trim();
+  const uploadTags = document.getElementById('uploadTags').value.trim();
+  const uploadDesc = document.getElementById('uploadDesc').value.trim();
+  if (uploadTitle) formData.append('title', uploadTitle);
+  if (uploadTags) formData.append('tags', uploadTags);
+  if (uploadDesc) formData.append('description', uploadDesc);
   try {
     const resp = await fetch(`${API_BASE}/api/upload`, {
       method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: formData
@@ -316,7 +325,7 @@ async function uploadFiles(files) {
     if (data.success) {
       const success = data.data.filter(d => d.success).length;
       const failed = data.data.filter(d => !d.success).length;
-      resultEl.innerHTML = `✅ 成功上传 ${success} 个文件` + (failed ? `，${failed} 个失败` : '');
+      resultEl.innerHTML = `�?成功上传 ${success} 个文件` + (failed ? `�?{failed} 个失败` : '');
       loadStats(); loadResources();
     } else {
       resultEl.textContent = '上传失败: ' + (data.error || '未知错误');
@@ -330,7 +339,7 @@ async function addLink() {
   const description = document.getElementById('linkDesc').value.trim();
   const tags = document.getElementById('linkTags').value.trim();
   const resultEl = document.getElementById('linkResult');
-  if (!title || !url) { resultEl.textContent = '标题和链接不能为空'; resultEl.style.color = '#f87171'; return; }
+  if (!title || !url) { resultEl.textContent = '标题和链接不能为�?; resultEl.style.color = '#f87171'; return; }
   try {
     const resp = await fetch(`${API_BASE}/api/resources`, {
       method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -358,7 +367,7 @@ async function loadStats() {
         <div class="stat-card"><div class="stat-label">资源总数</div><div class="stat-value">${s.total}</div></div>
         <div class="stat-card"><div class="stat-label">上传文件</div><div class="stat-value">${s.files}</div></div>
         <div class="stat-card"><div class="stat-label">外部链接</div><div class="stat-value">${s.links}</div></div>
-        <div class="stat-card"><div class="stat-label">总大小</div><div class="stat-value">${formatSize(s.total_size)}</div></div>
+        <div class="stat-card"><div class="stat-label">总大�?/div><div class="stat-value">${formatSize(s.total_size)}</div></div>
       `;
     }
   } catch(e) {}
@@ -395,7 +404,7 @@ async function loadResources() {
 }
 
 async function deleteResource(id) {
-  if (!confirm('确定删除该资源吗？')) return;
+  if (!confirm('确定删除该资源吗�?)) return;
   try {
     const resp = await fetch(`${API_BASE}/api/resources/${id}`, {
       method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` }
