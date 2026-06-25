@@ -140,6 +140,8 @@ table tr:hover { background: rgba(255,255,255,0.03); }
 .type-badge.document { background: rgba(139,92,246,0.2); color: #a78bfa; }
 .type-badge.link { background: rgba(20,184,166,0.2); color: #2dd4bf; }
 .type-badge.archive { background: rgba(244,114,182,0.2); color: #f472b6; }
+.type-badge.3d { background: rgba(250,204,21,0.2); color: #facc15; }
+.type-badge.code { background: rgba(168,85,247,0.2); color: #c084fc; }
 .type-badge.other { background: rgba(156,163,175,0.2); color: #9ca3af; }
 .btn-del {
   padding: 4px 12px; border-radius: 6px; border: none; font-size: 12px; cursor: pointer;
@@ -204,9 +206,9 @@ table tr:hover { background: rgba(255,255,255,0.03); }
         <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
           <div class="upload-icon">&#x1F4E4;</div>
           <p>拖拽文件到此处，或点击选择文件</p>
-          <p style="font-size:11px;margin-top:4px;color:rgba(255,255,255,0.3)">支持图片、视频、音频、文档、压缩包等</p>
+          <p style="font-size:11px;margin-top:4px;color:rgba(255,255,255,0.3)">支持图片/视频/音频/文档/3D设计/代码/压缩包/字体等 140+ 格式</p>
         </div>
-        <input type="file" id="fileInput" multiple hidden accept=".jpg,.jpeg,.png,.gif,.bmp,.webp,.svg,.mp4,.avi,.mov,.mkv,.webm,.mp3,.wav,.flac,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,.rar,.7z">
+        <input type="file" id="fileInput" multiple hidden accept=".jpg,.jpeg,.png,.gif,.bmp,.webp,.svg,.ico,.tiff,.tif,.raw,.cr2,.nef,.dng,.arw,.heic,.heif,.psd,.ai,.eps,.cdr,.indd,.xcf,.psb,.jp2,.jxr,.mp4,.avi,.mov,.mkv,.webm,.flv,.wmv,.mts,.m2ts,.ts,.vob,.3gp,.ogv,.rmvb,.rm,.asf,.mpeg,.mpg,.mod,.tod,.f4v,.m4v,.divx,.xvid,.mp3,.wav,.flac,.ogg,.wma,.aac,.m4a,.aiff,.alac,.ape,.mid,.midi,.amr,.opus,.mka,.ac3,.dts,.wv,.ra,.caf,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.md,.rtf,.odt,.ods,.odp,.epub,.mobi,.djvu,.tex,.xml,.html,.htm,.zip,.rar,.7z,.tar,.gz,.bz2,.xz,.iso,.cab,.arj,.tgz,.tbz2,.txz,.c4d,.blend,.fbx,.obj,.stl,.3ds,.max,.mb,.ma,.glb,.gltf,.dae,.usd,.usdz,.step,.stp,.iges,.igs,.ply,.abc,.skp,.3mf,.js,.ts,.jsx,.tsx,.py,.java,.c,.cpp,.h,.hpp,.go,.rs,.swift,.kt,.php,.rb,.sql,.sh,.bat,.ps1,.yml,.yaml,.toml,.ini,.cfg,.conf,.env,.css,.scss,.less,.vue,.svelte,.ttf,.otf,.woff,.woff2,.eot,.exe,.msi,.apk,.dmg,.deb,.rpm,.db,.sqlite,.sqlite3">
         <div class="upload-result" id="uploadResult"></div>
       </div>
 
@@ -237,7 +239,9 @@ table tr:hover { background: rgba(255,255,255,0.03); }
           <option value="video">视频</option>
           <option value="audio">音频</option>
           <option value="document">文档</option>
+          <option value="3d">3D设计</option>
           <option value="archive">压缩包</option>
+          <option value="code">代码</option>
           <option value="link">链接</option>
         </select>
         <button class="btn-sm" onclick="doLoadResources()">刷新</button>
@@ -419,6 +423,11 @@ function doLoadStats() {
   }).catch(function() {});
 }
 
+function typeLabel(t) {
+  var map = { image:'图片', video:'视频', audio:'音频', document:'文档', archive:'压缩包', link:'链接', '3d':'3D设计', code:'代码' };
+  return map[t] || t || '其他';
+}
+
 function doLoadResources() {
   var q = document.getElementById('searchInput').value;
   var t = document.getElementById('filterType').value;
@@ -431,7 +440,7 @@ function doLoadResources() {
     if (d.success && d.data && d.data.length > 0) {
       document.getElementById('resourceTableBody').innerHTML = d.data.map(function(r) {
         return '<tr>' +
-          '<td><span class="type-badge ' + (r.file_type || 'other') + '">' + (r.file_type || 'other') + '</span></td>' +
+          '<td><span class="type-badge ' + (r.file_type || 'other') + '">' + typeLabel(r.file_type) + '</span></td>' +
           '<td>' + escapeHtml(r.title) + '</td>' +
           '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escapeHtml(r.original_name || r.url || r.filename || '') + '</td>' +
           '<td>' + formatSize(r.file_size) + '</td>' +

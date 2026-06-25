@@ -34,20 +34,67 @@ ADMIN_PASSWORD_HASH = hashlib.sha256('admin123'.encode()).hexdigest()
 
 # 允许的文件类型
 ALLOWED_EXTENSIONS = {
-    'jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg',
-    'mp4', 'avi', 'mov', 'mkv', 'webm',
-    'mp3', 'wav', 'flac', 'ogg', 'wma',
-    'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx',
-    'txt', 'csv', 'zip', 'rar', '7z'
+    # 图片
+    'jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg', 'ico',
+    'tiff', 'tif', 'raw', 'cr2', 'nef', 'dng', 'arw', 'heic', 'heif',
+    'psd', 'ai', 'eps', 'cdr', 'indd', 'xcf', 'psb', 'orf', 'rw2',
+    'pef', 'raf', 'srw', 'x3f', 'jp2', 'j2k', 'jxr', 'hdp', 'wdp',
+    # 视频
+    'mp4', 'avi', 'mov', 'mkv', 'webm', 'flv', 'wmv', 'mts', 'm2ts',
+    'ts', 'vob', '3gp', 'ogv', 'rmvb', 'rm', 'asf', 'mpeg', 'mpg',
+    'mod', 'tod', 'f4v', 'm4v', 'divx', 'xvid',
+    # 音频
+    'mp3', 'wav', 'flac', 'ogg', 'wma', 'aac', 'm4a', 'aiff', 'alac',
+    'ape', 'mid', 'midi', 'amr', 'opus', 'mka', 'ac3', 'dts', 'wv',
+    'ra', 'm3u', 'caf', 'pcm', 'au',
+    # 文档
+    'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'csv',
+    'md', 'rtf', 'odt', 'ods', 'odp', 'epub', 'mobi', 'azw3', 'djvu',
+    'tex', 'pages', 'numbers', 'key', 'log', 'xml', 'html', 'htm',
+    # 压缩归档
+    'zip', 'rar', '7z', 'tar', 'gz', 'bz2', 'xz', 'iso', 'cab', 'arj',
+    'lz', 'lz4', 'zst', 'tgz', 'tbz2', 'txz', 'lzh', 'ace', 'uue',
+    # 3D / 设计
+    'c4d', 'blend', 'fbx', 'obj', 'stl', '3ds', 'max', 'mb', 'ma',
+    'glb', 'gltf', 'dae', 'usd', 'usdz', 'pz3', 'step', 'stp', 'iges',
+    'igs', 'ply', 'abc', 'skp', '3mf', 'amf', 'wrl', 'vrml',
+    # 代码 / 脚本
+    'js', 'ts', 'jsx', 'tsx', 'py', 'java', 'c', 'cpp', 'h', 'hpp',
+    'go', 'rs', 'swift', 'kt', 'php', 'rb', 'r', 'sql', 'sh', 'bat',
+    'ps1', 'yml', 'yaml', 'toml', 'ini', 'cfg', 'conf', 'env', 'css',
+    'scss', 'less', 'sass', 'vue', 'svelte',
+    # 字体
+    'ttf', 'otf', 'woff', 'woff2', 'eot',
+    # 可执行 / 应用包
+    'exe', 'msi', 'apk', 'dmg', 'pkg', 'ipa', 'deb', 'rpm',
+    # 数据库
+    'db', 'sqlite', 'sqlite3', 'mdb', 'accdb',
 }
 
 # 文件类型分类
 FILE_TYPE_MAP = {
-    'image': {'jpg','jpeg','png','gif','bmp','webp','svg','ico'},
-    'video': {'mp4','avi','mov','mkv','webm','flv','wmv'},
-    'audio': {'mp3','wav','flac','ogg','wma','aac','m4a'},
-    'document': {'pdf','doc','docx','xls','xlsx','ppt','pptx','txt','csv'},
-    'archive': {'zip','rar','7z','tar','gz'}
+    'image': {'jpg','jpeg','png','gif','bmp','webp','svg','ico',
+              'tiff','tif','raw','cr2','nef','dng','arw','heic','heif',
+              'psd','ai','eps','cdr','indd','xcf','psb','orf','rw2',
+              'pef','raf','srw','x3f','jp2','j2k','jxr','hdp','wdp'},
+    'video': {'mp4','avi','mov','mkv','webm','flv','wmv','mts','m2ts',
+              'ts','vob','3gp','ogv','rmvb','rm','asf','mpeg','mpg',
+              'mod','tod','f4v','m4v','divx','xvid'},
+    'audio': {'mp3','wav','flac','ogg','wma','aac','m4a','aiff','alac',
+              'ape','mid','midi','amr','opus','mka','ac3','dts','wv',
+              'ra','m3u','caf','pcm','au'},
+    '3d': {'c4d','blend','fbx','obj','stl','3ds','max','mb','ma',
+           'glb','gltf','dae','usd','usdz','pz3','step','stp','iges',
+           'igs','ply','abc','skp','3mf','amf','wrl','vrml'},
+    'document': {'pdf','doc','docx','xls','xlsx','ppt','pptx','txt','csv',
+                 'md','rtf','odt','ods','odp','epub','mobi','azw3','djvu',
+                 'tex','pages','numbers','key','log','xml','html','htm'},
+    'archive': {'zip','rar','7z','tar','gz','bz2','xz','iso','cab','arj',
+                'lz','lz4','zst','tgz','tbz2','txz','lzh','ace','uue'},
+    'code': {'js','ts','jsx','tsx','py','java','c','cpp','h','hpp',
+             'go','rs','swift','kt','php','rb','r','sql','sh','bat',
+             'ps1','yml','yaml','toml','ini','cfg','conf','env','css',
+             'scss','less','sass','vue','svelte'},
 }
 
 def get_file_category(ext):
