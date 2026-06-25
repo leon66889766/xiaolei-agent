@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -50,7 +50,7 @@ body {
   display: flex; align-items: center; justify-content: space-between;
 }
 .admin-header h1 {
-  font-size: 20px; font-weight: 700;
+  font-size: 20px;
   background: linear-gradient(90deg, #a5b4fc, #c4b5fd);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -162,72 +162,95 @@ table tr:hover { background: rgba(255,255,255,0.03); }
   <div class="login-card">
     <h1>小雷没摸鱼agent</h1>
     <p class="subtitle">管理后台 - 资源管理</p>
-    <div class="form-group"><label>管理员账�?/label><input type="text" id="loginUsername" placeholder="请输入管理员账号" value="admin"></div>
-    <div class="form-group"><label>管理员密�?/label><input type="password" id="loginPassword" placeholder="请输入密�? value="admin123"></div>
-    <button class="btn-primary" id="loginBtn" onclick="login()">�?�?/button>
+    <div class="form-group">
+      <label>管理员账号</label>
+      <input type="text" id="loginUsername" placeholder="请输入管理员账号" value="admin">
+    </div>
+    <div class="form-group">
+      <label>管理员密码</label>
+      <input type="password" id="loginPassword" placeholder="请输入密码" value="admin123">
+    </div>
+    <button class="btn-primary" id="loginBtn" onclick="doLogin()">登录</button>
     <p class="error-msg" id="loginError"></p>
   </div>
 </div>
 
 <div class="admin-container" id="adminPage">
   <div class="admin-header">
-    <h1>�?小雷没摸鱼agent - 管理后台</h1>
+    <h1>小雷没摸鱼agent - 管理后台</h1>
     <div class="header-right">
       <span class="username" id="currentUser"></span>
-      <button class="btn-logout" onclick="logout()">退出登�?/button>
+      <button class="btn-logout" onclick="doLogout()">退出登录</button>
     </div>
   </div>
   <div class="admin-main">
-    <div class="stats-row" id="statsRow"></div>
+    <div class="stats-row" id="statsRow">
+      <div class="stat-card"><div class="stat-label">资源总数</div><div class="stat-value">0</div></div>
+      <div class="stat-card"><div class="stat-label">上传文件</div><div class="stat-value">0</div></div>
+      <div class="stat-card"><div class="stat-label">外部链接</div><div class="stat-value">0</div></div>
+      <div class="stat-card"><div class="stat-label">总大小</div><div class="stat-value">-</div></div>
+    </div>
+
     <div class="panels">
+      <!-- 上传文件面板 -->
       <div class="panel">
-        <h3>📁 上传文件</h3>
-        <label>资源名称（可选，多文件时使用文件名）</label><input type="text" id="uploadTitle" placeholder="给资源起个名字，方便搜索">
-        <label>标签（可选，逗号分隔，便于检索）</label><input type="text" id="uploadTags" placeholder="例如：logo, 品牌, VI">
-        <label>描述（可选）</label><textarea id="uploadDesc" placeholder="简要描述资源内容" style="min-height:48px"></textarea>
+        <h3>上传文件</h3>
+        <label>资源名称（可选，多文件时使用文件名）</label>
+        <input type="text" id="uploadTitle" placeholder="给资源起个名字，方便搜索">
+        <label>标签（可选，逗号分隔，便于检索）</label>
+        <input type="text" id="uploadTags" placeholder="例如：logo, 品牌, VI设计">
+        <label>描述（可选）</label>
+        <textarea id="uploadDesc" placeholder="简要描述资源内容，帮助AI更好匹配" style="min-height:48px"></textarea>
         <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
-          <div class="upload-icon">📤</div>
-          <p>拖拽文件到此�?�?点击选择文件</p>
-          <p style="font-size:11px;margin-top:4px;color:rgba(255,255,255,0.3)">支持图片、视频、音频、文档、压缩包�?/p>
+          <div class="upload-icon">&#x1F4E4;</div>
+          <p>拖拽文件到此处，或点击选择文件</p>
+          <p style="font-size:11px;margin-top:4px;color:rgba(255,255,255,0.3)">支持图片、视频、音频、文档、压缩包等</p>
         </div>
         <input type="file" id="fileInput" multiple hidden accept=".jpg,.jpeg,.png,.gif,.bmp,.webp,.svg,.mp4,.avi,.mov,.mkv,.webm,.mp3,.wav,.flac,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,.rar,.7z">
         <div class="upload-result" id="uploadResult"></div>
       </div>
+
+      <!-- 添加链接面板 -->
       <div class="panel">
-        <h3>🔗 添加链接</h3>
-        <label>链接标题</label><input type="text" id="linkTitle" placeholder="资源标题">
-        <label>链接地址</label><input type="text" id="linkUrl" placeholder="https://...">
-        <label>描述（可选）</label><textarea id="linkDesc" placeholder="资源描述"></textarea>
-        <label>标签（可选，逗号分隔�?/label><input type="text" id="linkTags" placeholder="标签1, 标签2">
-        <button class="btn-sm" onclick="addLink()">添加链接</button>
+        <h3>添加链接</h3>
+        <label>链接标题</label>
+        <input type="text" id="linkTitle" placeholder="资源标题">
+        <label>链接地址</label>
+        <input type="text" id="linkUrl" placeholder="https://...">
+        <label>描述（可选）</label>
+        <textarea id="linkDesc" placeholder="资源描述"></textarea>
+        <label>标签（可选，逗号分隔）</label>
+        <input type="text" id="linkTags" placeholder="标签1, 标签2">
+        <button class="btn-sm" onclick="doAddLink()">添加链接</button>
         <div id="linkResult" style="margin-top:8px;font-size:12px;"></div>
       </div>
     </div>
 
+    <!-- 资源列表 -->
     <div class="resource-table-section">
-      <h3>📋 资源列表 (<span id="resourceCount">0</span>)</h3>
+      <h3>资源列表 (<span id="resourceCount">0</span>)</h3>
       <div class="toolbar">
-        <input type="text" id="searchInput" placeholder="搜索资源..." oninput="loadResources()">
-        <select id="filterType" onchange="loadResources()">
+        <input type="text" id="searchInput" placeholder="搜索资源..." oninput="doLoadResources()">
+        <select id="filterType" onchange="doLoadResources()">
           <option value="">全部类型</option>
           <option value="image">图片</option>
           <option value="video">视频</option>
           <option value="audio">音频</option>
           <option value="document">文档</option>
-          <option value="archive">压缩�?/option>
+          <option value="archive">压缩包</option>
           <option value="link">链接</option>
         </select>
-        <button class="btn-sm" onclick="loadResources()">刷新</button>
+        <button class="btn-sm" onclick="doLoadResources()">刷新</button>
       </div>
       <div class="table-wrapper">
         <table>
           <thead>
             <tr>
-              <th>类型</th><th>标题</th><th>文件�?链接</th><th>大小</th><th>标签</th><th>上传时间</th><th>操作</th>
+              <th>类型</th><th>标题</th><th>文件名/链接</th><th>大小</th><th>标签</th><th>上传时间</th><th>操作</th>
             </tr>
           </thead>
           <tbody id="resourceTableBody">
-            <tr><td colspan="7" class="empty-state">加载�?..</td></tr>
+            <tr><td colspan="7" class="empty-state">加载中...</td></tr>
           </tbody>
         </table>
       </div>
@@ -236,51 +259,57 @@ table tr:hover { background: rgba(255,255,255,0.03); }
 </div>
 
 <script>
-const API_BASE = 'https://view-vary-thick-transit.trycloudflare.com';
-let token = localStorage.getItem('xiaolei_token');
+var API_BASE = 'https://view-vary-thick-transit.trycloudflare.com';
+var token = localStorage.getItem('xiaolei_token') || '';
 
-if (token) {
-  verifyToken().then(ok => { if (ok) showAdmin(); else { localStorage.removeItem('xiaolei_token'); } });
-}
-
-async function verifyToken() {
-  try {
-    const resp = await fetch(`${API_BASE}/api/admin/verify`, { headers: { 'Authorization': `Bearer ${token}` } });
-    const data = await resp.json();
-    if (data.success) { document.getElementById('currentUser').textContent = data.username; return true; }
-  } catch(e) {}
-  return false;
-}
-
-async function login() {
-  const btn = document.getElementById('loginBtn');
-  const username = document.getElementById('loginUsername').value.trim();
-  const password = document.getElementById('loginPassword').value.trim();
-  if (!username || !password) { document.getElementById('loginError').textContent = '请输入账号和密码'; return; }
-  btn.disabled = true; btn.textContent = '登录�?..';
-  try {
-    const resp = await fetch(`${API_BASE}/api/admin/login`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password })
+(function init() {
+  if (token) {
+    verifyToken().then(function(ok) {
+      if (ok) showAdmin();
+      else { localStorage.removeItem('xiaolei_token'); token = ''; }
     });
-    const data = await resp.json();
-    if (data.success) {
-      token = data.token;
+  }
+})();
+
+function verifyToken() {
+  return fetch(API_BASE + '/api/admin/verify', {
+    headers: { 'Authorization': 'Bearer ' + token }
+  }).then(function(r) { return r.json(); }).then(function(d) {
+    if (d.success) { document.getElementById('currentUser').textContent = d.username; return true; }
+    return false;
+  }).catch(function() { return false; });
+}
+
+function doLogin() {
+  var btn = document.getElementById('loginBtn');
+  var username = document.getElementById('loginUsername').value.trim();
+  var password = document.getElementById('loginPassword').value.trim();
+  var errEl = document.getElementById('loginError');
+  if (!username || !password) { errEl.textContent = '请输入账号和密码'; return; }
+  btn.disabled = true; btn.textContent = '登录中...';
+  fetch(API_BASE + '/api/admin/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: username, password: password })
+  }).then(function(r) { return r.json(); }).then(function(d) {
+    if (d.success) {
+      token = d.token;
       localStorage.setItem('xiaolei_token', token);
-      document.getElementById('currentUser').textContent = data.username;
+      document.getElementById('currentUser').textContent = d.username;
       showAdmin();
     } else {
-      document.getElementById('loginError').textContent = data.error || '登录失败';
+      errEl.textContent = d.error || '登录失败';
     }
-  } catch(e) {
-    document.getElementById('loginError').textContent = '连接服务器失�? ' + e.message;
-  }
-  btn.disabled = false; btn.textContent = '�?�?;
+  }).catch(function(e) {
+    errEl.textContent = '连接服务器失败: ' + e.message;
+  }).finally(function() {
+    btn.disabled = false; btn.textContent = '登录';
+  });
 }
 
-function logout() {
+function doLogout() {
   localStorage.removeItem('xiaolei_token');
-  token = null;
+  token = '';
   document.getElementById('loginPage').style.display = 'flex';
   document.getElementById('adminPage').style.display = 'none';
 }
@@ -288,143 +317,158 @@ function logout() {
 function showAdmin() {
   document.getElementById('loginPage').style.display = 'none';
   document.getElementById('adminPage').style.display = 'block';
-  loadStats();
-  loadResources();
+  doLoadStats();
+  doLoadResources();
   setupDragDrop();
 }
 
 function setupDragDrop() {
-  const zone = document.getElementById('uploadZone');
-  const fileInput = document.getElementById('fileInput');
-  fileInput.addEventListener('change', () => uploadFiles(fileInput.files));
-  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
-  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
-  zone.addEventListener('drop', e => {
+  var zone = document.getElementById('uploadZone');
+  var fileInput = document.getElementById('fileInput');
+  fileInput.addEventListener('change', function() { doUploadFiles(fileInput.files); });
+  zone.addEventListener('dragover', function(e) { e.preventDefault(); zone.classList.add('drag-over'); });
+  zone.addEventListener('dragleave', function() { zone.classList.remove('drag-over'); });
+  zone.addEventListener('drop', function(e) {
     e.preventDefault(); zone.classList.remove('drag-over');
-    uploadFiles(e.dataTransfer.files);
+    doUploadFiles(e.dataTransfer.files);
   });
 }
 
-async function uploadFiles(files) {
-  if (!files.length) return;
-  const resultEl = document.getElementById('uploadResult');
-  resultEl.textContent = '上传�?..';
-  const formData = new FormData();
-  for (let f of files) formData.append('files', f);
-  const uploadTitle = document.getElementById('uploadTitle').value.trim();
-  const uploadTags = document.getElementById('uploadTags').value.trim();
-  const uploadDesc = document.getElementById('uploadDesc').value.trim();
+function doUploadFiles(files) {
+  if (!files || !files.length) return;
+  var resultEl = document.getElementById('uploadResult');
+  resultEl.textContent = '上传中...';
+  resultEl.style.color = 'rgba(255,255,255,0.5)';
+  var formData = new FormData();
+  for (var i = 0; i < files.length; i++) formData.append('files', files[i]);
+  var uploadTitle = document.getElementById('uploadTitle').value.trim();
+  var uploadTags = document.getElementById('uploadTags').value.trim();
+  var uploadDesc = document.getElementById('uploadDesc').value.trim();
   if (uploadTitle) formData.append('title', uploadTitle);
   if (uploadTags) formData.append('tags', uploadTags);
   if (uploadDesc) formData.append('description', uploadDesc);
-  try {
-    const resp = await fetch(`${API_BASE}/api/upload`, {
-      method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: formData
-    });
-    const data = await resp.json();
-    if (data.success) {
-      const success = data.data.filter(d => d.success).length;
-      const failed = data.data.filter(d => !d.success).length;
-      resultEl.innerHTML = `�?成功上传 ${success} 个文件` + (failed ? `�?{failed} 个失败` : '');
-      loadStats(); loadResources();
+
+  fetch(API_BASE + '/api/upload', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + token },
+    body: formData
+  }).then(function(r) { return r.json(); }).then(function(d) {
+    if (d.success) {
+      var success = 0, failed = 0;
+      d.data.forEach(function(item) { if (item.success) success++; else failed++; });
+      resultEl.innerHTML = '&#x2705; 成功上传 ' + success + ' 个文件' + (failed ? '，' + failed + ' 个失败' : '');
+      resultEl.style.color = '#4ade80';
+      document.getElementById('uploadTitle').value = '';
+      document.getElementById('uploadTags').value = '';
+      document.getElementById('uploadDesc').value = '';
+      document.getElementById('fileInput').value = '';
+      doLoadStats();
+      doLoadResources();
     } else {
-      resultEl.textContent = '上传失败: ' + (data.error || '未知错误');
+      resultEl.textContent = '上传失败: ' + (d.error || '未知错误');
+      resultEl.style.color = '#f87171';
     }
-  } catch(e) { resultEl.textContent = '上传失败: ' + e.message; }
+  }).catch(function(e) {
+    resultEl.textContent = '上传失败: ' + e.message;
+    resultEl.style.color = '#f87171';
+  });
 }
 
-async function addLink() {
-  const title = document.getElementById('linkTitle').value.trim();
-  const url = document.getElementById('linkUrl').value.trim();
-  const description = document.getElementById('linkDesc').value.trim();
-  const tags = document.getElementById('linkTags').value.trim();
-  const resultEl = document.getElementById('linkResult');
-  if (!title || !url) { resultEl.textContent = '标题和链接不能为�?; resultEl.style.color = '#f87171'; return; }
-  try {
-    const resp = await fetch(`${API_BASE}/api/resources`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify({ title, url, description, tags })
-    });
-    const data = await resp.json();
-    if (data.success) {
-      resultEl.textContent = '链接添加成功'; resultEl.style.color = '#4ade80';
-      document.getElementById('linkTitle').value = ''; document.getElementById('linkUrl').value = '';
-      document.getElementById('linkDesc').value = ''; document.getElementById('linkTags').value = '';
-      loadStats(); loadResources();
+function doAddLink() {
+  var title = document.getElementById('linkTitle').value.trim();
+  var url = document.getElementById('linkUrl').value.trim();
+  var description = document.getElementById('linkDesc').value.trim();
+  var tags = document.getElementById('linkTags').value.trim();
+  var resultEl = document.getElementById('linkResult');
+  if (!title || !url) { resultEl.textContent = '标题和链接不能为空'; resultEl.style.color = '#f87171'; return; }
+  fetch(API_BASE + '/api/resources', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    body: JSON.stringify({ title: title, url: url, description: description, tags: tags })
+  }).then(function(r) { return r.json(); }).then(function(d) {
+    if (d.success) {
+      resultEl.textContent = '链接添加成功';
+      resultEl.style.color = '#4ade80';
+      document.getElementById('linkTitle').value = '';
+      document.getElementById('linkUrl').value = '';
+      document.getElementById('linkDesc').value = '';
+      document.getElementById('linkTags').value = '';
+      doLoadStats();
+      doLoadResources();
     } else {
-      resultEl.textContent = data.error; resultEl.style.color = '#f87171';
+      resultEl.textContent = d.error || '添加失败';
+      resultEl.style.color = '#f87171';
     }
-  } catch(e) { resultEl.textContent = '添加失败: ' + e.message; resultEl.style.color = '#f87171'; }
+  }).catch(function(e) {
+    resultEl.textContent = '添加失败: ' + e.message;
+    resultEl.style.color = '#f87171';
+  });
 }
 
-async function loadStats() {
-  try {
-    const resp = await fetch(`${API_BASE}/api/stats`, { headers: { 'Authorization': `Bearer ${token}` } });
-    const data = await resp.json();
-    if (data.success) {
-      const s = data.data;
-      document.getElementById('statsRow').innerHTML = `
-        <div class="stat-card"><div class="stat-label">资源总数</div><div class="stat-value">${s.total}</div></div>
-        <div class="stat-card"><div class="stat-label">上传文件</div><div class="stat-value">${s.files}</div></div>
-        <div class="stat-card"><div class="stat-label">外部链接</div><div class="stat-value">${s.links}</div></div>
-        <div class="stat-card"><div class="stat-label">总大�?/div><div class="stat-value">${formatSize(s.total_size)}</div></div>
-      `;
+function doLoadStats() {
+  fetch(API_BASE + '/api/stats', { headers: { 'Authorization': 'Bearer ' + token } })
+    .then(function(r) { return r.json(); }).then(function(d) {
+    if (d.success) {
+      var s = d.data;
+      document.getElementById('statsRow').innerHTML =
+        '<div class="stat-card"><div class="stat-label">资源总数</div><div class="stat-value">' + s.total + '</div></div>' +
+        '<div class="stat-card"><div class="stat-label">上传文件</div><div class="stat-value">' + s.files + '</div></div>' +
+        '<div class="stat-card"><div class="stat-label">外部链接</div><div class="stat-value">' + s.links + '</div></div>' +
+        '<div class="stat-card"><div class="stat-label">总大小</div><div class="stat-value">' + formatSize(s.total_size) + '</div></div>';
     }
-  } catch(e) {}
+  }).catch(function() {});
 }
 
-async function loadResources() {
-  const q = document.getElementById('searchInput').value;
-  const t = document.getElementById('filterType').value;
-  let url = `${API_BASE}/api/resources?`;
-  if (q) url += `q=${encodeURIComponent(q)}&`;
-  if (t) url += `type=${encodeURIComponent(t)}&`;
-  try {
-    const resp = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
-    const data = await resp.json();
-    document.getElementById('resourceCount').textContent = data.total;
-    if (data.success && data.data.length > 0) {
-      document.getElementById('resourceTableBody').innerHTML = data.data.map(r => `
-        <tr>
-          <td><span class="type-badge ${r.file_type}">${r.file_type}</span></td>
-          <td>${escapeHtml(r.title)}</td>
-          <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(r.original_name || r.url || r.filename)}</td>
-          <td>${formatSize(r.file_size)}</td>
-          <td>${escapeHtml(r.tags || '-')}</td>
-          <td>${r.created_at || '-'}</td>
-          <td><button class="btn-del" onclick="deleteResource('${r.id}')">删除</button></td>
-        </tr>
-      `).join('');
+function doLoadResources() {
+  var q = document.getElementById('searchInput').value;
+  var t = document.getElementById('filterType').value;
+  var url = API_BASE + '/api/resources?';
+  if (q) url += 'q=' + encodeURIComponent(q) + '&';
+  if (t) url += 'type=' + encodeURIComponent(t) + '&';
+  fetch(url, { headers: { 'Authorization': 'Bearer ' + token } })
+    .then(function(r) { return r.json(); }).then(function(d) {
+    document.getElementById('resourceCount').textContent = d.total || 0;
+    if (d.success && d.data && d.data.length > 0) {
+      document.getElementById('resourceTableBody').innerHTML = d.data.map(function(r) {
+        return '<tr>' +
+          '<td><span class="type-badge ' + (r.file_type || 'other') + '">' + (r.file_type || 'other') + '</span></td>' +
+          '<td>' + escapeHtml(r.title) + '</td>' +
+          '<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escapeHtml(r.original_name || r.url || r.filename || '') + '</td>' +
+          '<td>' + formatSize(r.file_size) + '</td>' +
+          '<td>' + escapeHtml(r.tags || '-') + '</td>' +
+          '<td>' + (r.created_at || '-') + '</td>' +
+          '<td><button class="btn-del" onclick="doDeleteResource(\'' + r.id + '\')">删除</button></td>' +
+        '</tr>';
+      }).join('');
     } else {
       document.getElementById('resourceTableBody').innerHTML = '<tr><td colspan="7" class="empty-state">暂无资源</td></tr>';
     }
-  } catch(e) {
+  }).catch(function() {
     document.getElementById('resourceTableBody').innerHTML = '<tr><td colspan="7" class="empty-state">加载失败</td></tr>';
-  }
+  });
 }
 
-async function deleteResource(id) {
-  if (!confirm('确定删除该资源吗�?)) return;
-  try {
-    const resp = await fetch(`${API_BASE}/api/resources/${id}`, {
-      method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` }
-    });
-    const data = await resp.json();
-    if (data.success) { loadStats(); loadResources(); }
-    else alert(data.error);
-  } catch(e) { alert('删除失败: ' + e.message); }
+function doDeleteResource(id) {
+  if (!confirm('确定删除该资源吗？')) return;
+  fetch(API_BASE + '/api/resources/' + id, {
+    method: 'DELETE',
+    headers: { 'Authorization': 'Bearer ' + token }
+  }).then(function(r) { return r.json(); }).then(function(d) {
+    if (d.success) { doLoadStats(); doLoadResources(); }
+    else alert(d.error || '删除失败');
+  }).catch(function(e) { alert('删除失败: ' + e.message); });
 }
 
 function formatSize(bytes) {
   if (!bytes || bytes === 0) return '-';
-  const units = ['B','KB','MB','GB'];
-  let i = 0, s = bytes;
+  var units = ['B','KB','MB','GB'];
+  var s = bytes, i = 0;
   while (s >= 1024 && i < 3) { s /= 1024; i++; }
   return s.toFixed(2) + ' ' + units[i];
 }
 
 function escapeHtml(text) {
-  const d = document.createElement('div');
+  var d = document.createElement('div');
   d.textContent = text || '';
   return d.innerHTML;
 }
