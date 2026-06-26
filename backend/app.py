@@ -612,5 +612,27 @@ def _compute_reply_signature(token, timestamp, nonce, encrypt):
     return hashlib.sha1(''.join(params).encode('utf-8')).hexdigest()
 
 
+# ========== 静态文件托管 ==========
+FRONTEND_DIR = os.path.join(BASE_DIR, '..', 'frontend')
+ADMIN_DIR = os.path.join(BASE_DIR, '..', 'admin')
+
+@app.route('/')
+def serve_index():
+    return send_from_directory(FRONTEND_DIR, 'index.html')
+
+@app.route('/admin')
+@app.route('/admin/')
+def serve_admin_index():
+    return send_from_directory(ADMIN_DIR, 'index.html')
+
+@app.route('/<path:path>')
+def serve_static(path):
+    if os.path.exists(os.path.join(FRONTEND_DIR, path)):
+        return send_from_directory(FRONTEND_DIR, path)
+    if os.path.exists(os.path.join(ADMIN_DIR, path)):
+        return send_from_directory(ADMIN_DIR, path)
+    return jsonify({"error": "Not found"}), 404
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

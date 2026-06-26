@@ -175,7 +175,7 @@ body {
 </div>
 
 <script>
-var API_BASE = 'https://plants-sam-campaigns-nominations.trycloudflare.com';
+var API_BASE = '';
 
 function sendQuick(text) {
   document.getElementById('userInput').value = text;
@@ -197,7 +197,7 @@ function sendMessage() {
   var btn = document.getElementById('sendBtn');
   btn.disabled = true;
 
-  fetch(API_BASE + '/api/search', {
+  fetch('/api/search', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ query: text })
@@ -232,7 +232,7 @@ function showSearchResults(results, query) {
 
 function renderResourceCard(r) {
   var html = '<div class="resource-card">';
-  var apiBase = API_BASE;
+  var apiBase = '';
 
   if (r.resource_type === 'link') {
     html += '<a class="external-link" href="' + escapeAttr(r.url) + '" target="_blank">' +
