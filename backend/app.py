@@ -11,9 +11,19 @@ import uuid
 import hashlib
 from datetime import datetime, timedelta
 
-from flask import Flask, request, jsonify, send_from_directory
+import xml.etree.ElementTree as ET
+
+from flask import Flask, request, jsonify, send_from_directory, make_response
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
+
+from wework_crypto import (
+    load_config as load_wework_config,
+    verify_signature,
+    decrypt_message,
+    encrypt_message,
+    verify_url,
+)
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
@@ -424,6 +434,182 @@ def get_stats():
             "total_size": total_size
         }
     })
+
+
+# ========== 企业微信消息回调 API ==========
+
+def _parse_wework_xml(xml_text):
+    """解析企业微信回调 XML，返回 dict"""
+    root = ET.fromstring(xml_text)
+    result = {}
+    for child in root:
+        result[child.tag] = child.text or ''
+    return result
+
+
+def _build_wework_reply_xml(to_user, from_user, content, msg_type='text'):
+    """构造回复消息的 XML"""
+    create_time = str(int(time.time()))
+    xml = (
+        '<xml>'
+        f'<ToUserName><![CDATA[{to_user}]]></ToUserName>'
+        f'<FromUserName><![CDATA[{from_user}]]></FromUserName>'
+        f'<CreateTime>{create_time}</CreateTime>'
+        f'<MsgType><![CDATA[{msg_type}]]></MsgType>'
+        f'<Content><![CDATA[{content}]]></Content>'
+        '</xml>'
+    )
+    return xml
+
+
+def _build_wework_encrypted_xml(encrypt, msg_signature, timestamp, nonce):
+    """构造加密回复的 XML"""
+    xml = (
+        '<xml>'
+        f'<Encrypt><![CDATA[{encrypt}]]></Encrypt>'
+        f'<MsgSignature><![CDATA[{msg_signature}]]></MsgSignature>'
+        f'<TimeStamp>{timestamp}</TimeStamp>'
+        f'<Nonce><![CDATA[{nonce}]]></Nonce>'
+        '</xml>'
+    )
+    return xml
+
+
+@app.route('/api/wework/callback', methods=['GET'])
+def wework_verify():
+    """企业微信 URL 验证"""
+    try:
+        config = load_wework_config()
+    except FileNotFoundError:
+        return 'config file not found', 500
+
+    msg_signature = request.args.get('msg_signature', '')
+    timestamp = request.args.get('timestamp', '')
+    nonce = request.args.get('nonce', '')
+    echostr = request.args.get('echostr', '')
+
+    if not all([msg_signature, timestamp, nonce, echostr]):
+        return 'missing parameters', 400
+
+    try:
+        decrypted = verify_url(
+            config['Token'],
+            config['EncodingAESKey'],
+            msg_signature,
+            timestamp,
+            nonce,
+            echostr,
+            config['CorpID'],
+        )
+        return decrypted
+    except Exception as e:
+        app.logger.error(f"企业微信 URL 验证失败: {e}")
+        return f'verify failed: {e}', 403
+
+
+@app.route('/api/wework/callback', methods=['POST'])
+def wework_callback():
+    """企业微信消息回调"""
+    try:
+        config = load_wework_config()
+    except FileNotFoundError:
+        return 'config file not found', 500
+
+    token = config['Token']
+    aes_key = config['EncodingAESKey']
+    corp_id = config['CorpID']
+
+    msg_signature = request.args.get('msg_signature', '')
+    timestamp = request.args.get('timestamp', '')
+    nonce = request.args.get('nonce', '')
+
+    if not all([msg_signature, timestamp, nonce]):
+        return 'missing parameters', 400
+
+    # 获取加密的 XML 体
+    raw_xml = request.get_data(as_text=True)
+    parsed = _parse_wework_xml(raw_xml)
+    msg_encrypt = parsed.get('Encrypt', '')
+
+    if not msg_encrypt:
+        return 'missing Encrypt', 400
+
+    # 验证签名
+    if not verify_signature(token, timestamp, nonce, msg_encrypt, msg_signature):
+        return 'signature invalid', 403
+
+    # 解密消息
+    try:
+        decrypted_xml = decrypt_message(aes_key, msg_encrypt, corp_id)
+    except Exception as e:
+        app.logger.error(f"解密消息失败: {e}")
+        return f'decrypt failed: {e}', 500
+
+    # 解析消息
+    msg_data = _parse_wework_xml(decrypted_xml)
+    msg_type = msg_data.get('MsgType', '')
+    from_user = msg_data.get('FromUserName', '')
+    to_user = msg_data.get('ToUserName', '')
+
+    # 处理消息
+    if msg_type == 'text':
+        content = msg_data.get('Content', '').strip()
+        # 调用搜索逻辑
+        resources = load_resources()
+        reply_text = ''
+        if not resources:
+            reply_text = '资源库暂时为空，请联系管理员添加资源。'
+        elif not content:
+            reply_text = '请输入您想查询的问题。'
+        else:
+            scored = []
+            for r in resources:
+                s = match_score(content, r)
+                scored.append((s, r))
+            scored.sort(key=lambda x: x[0], reverse=True)
+            results = [r for s, r in scored if s > 0][:5]
+            if not results:
+                reply_text = '未找到匹配的资源，请尝试换个方式提问。'
+            else:
+                lines = ['为您找到以下相关资源：']
+                for i, r in enumerate(results, 1):
+                    title = r.get('title', '无标题')
+                    desc = r.get('description', '')[:80]
+                    url = r.get('url', '')
+                    if url and not url.startswith('http'):
+                        url = ''  # 本地文件路径不展示
+                    line = f"{i}. {title}"
+                    if desc:
+                        line += f"\n   {desc}"
+                    if url:
+                        line += f"\n   {url}"
+                    lines.append(line)
+                reply_text = '\n'.join(lines)
+    else:
+        reply_text = '暂不支持此消息类型，目前仅支持文字消息。'
+
+    # 构造回复 XML（From/To 互换）
+    reply_xml = _build_wework_reply_xml(from_user, to_user, reply_text)
+
+    # 加密回复
+    encrypted = encrypt_message(aes_key, reply_xml, corp_id)
+
+    # 生成签名
+    new_signature = _compute_reply_signature(token, timestamp, nonce, encrypted)
+
+    # 构造加密 XML 响应
+    response_xml = _build_wework_encrypted_xml(encrypted, new_signature, timestamp, nonce)
+
+    response = make_response(response_xml)
+    response.headers['Content-Type'] = 'application/xml; charset=utf-8'
+    return response
+
+
+def _compute_reply_signature(token, timestamp, nonce, encrypt):
+    """计算回复消息的签名"""
+    import hashlib
+    params = sorted([token, timestamp, nonce, encrypt])
+    return hashlib.sha1(''.join(params).encode('utf-8')).hexdigest()
 
 
 if __name__ == '__main__':

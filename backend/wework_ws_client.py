@@ -39,10 +39,10 @@ logger = logging.getLogger("wework_ws")
 
 # ── 配置 ──────────────────────────────────────────────────
 WS_URL = "wss://openws.work.weixin.qq.com"
-BOT_ID = "aibah14B_kW8rZto85NBfWcn7b1FvkWdGHi"
-SECRET = "CFPPOmrU4vVEnLK5TPGOJuYsNjRoQNXmyOKeqDMtFo4"
+BOT_ID = "aibBlwO75B0qfQNBxqIfZutzfSudJD-AiCO"
+SECRET = "W6IenzItnOjYpJ53qc3lvm3ArhQFJrvKN7SgYQb4bri"
 
-HEARTBEAT_INTERVAL = 30          # 心跳间隔（秒）
+HEARTBEAT_INTERVAL = 15          # 心跳间隔（秒）
 RECONNECT_BASE_DELAY = 1         # 重连基础延迟（秒）
 RECONNECT_MAX_DELAY = 60         # 重连最大延迟（秒）
 RECONNECT_BACKOFF_FACTOR = 2     # 指数退避因子
@@ -141,16 +141,15 @@ class MessageHandler:
         return json.dumps(frame, ensure_ascii=False)
 
     def build_respond_frame(
-        self, req_id: str, msgid: str, content: str, msgtype: str = "text"
+        self, req_id: str, msgid: str, content: str, msgtype: str = "markdown"
     ) -> str:
-        """构建回复帧"""
+        """构建回复帧（企微 aibot_respond_msg 不支持 text 类型，使用 markdown）"""
         frame = {
             "cmd": "aibot_respond_msg",
             "headers": {"req_id": req_id},
             "body": {
-                "msgid": msgid,
                 "msgtype": msgtype,
-                "text": {"content": content},
+                "markdown": {"content": content},
             },
         }
         return json.dumps(frame, ensure_ascii=False)
@@ -194,6 +193,17 @@ class MessageHandler:
         body = frame.get("body", {})
         req_id = headers.get("req_id", "")
 
+        # DEBUG: 打印回调帧的 req_id
+        if cmd in ("aibot_msg_callback", "aibot_event_callback"):
+            logger.info(f"CALLBACK raw req_id='{req_id}' headers_keys={list(headers.keys())}")
+
+        # 服务端回执帧（响应 aibot_respond_msg 等）可能不带 cmd，通过 errcode 识别
+        errcode = frame.get("errcode", -1)
+        if errcode != -1:
+            errmsg = frame.get("errmsg", "")
+            logger.info(f"服务端回执: errcode={errcode}, errmsg={errmsg}")
+            return
+
         if cmd == "aibot_subscribe_resp":
             # 订阅响应
             self._handle_subscribe_resp(body)
@@ -210,7 +220,7 @@ class MessageHandler:
             logger.debug("收到 pong")
 
         else:
-            logger.debug(f"收到未处理的消息类型: {cmd}")
+            logger.info(f"收到未处理帧: cmd={cmd}, raw={json.dumps(frame, ensure_ascii=False)[:500]}")
 
     def _handle_subscribe_resp(self, body: dict):
         """处理订阅响应"""
@@ -242,6 +252,7 @@ class MessageHandler:
                 reply = format_results(scored)
 
             frame = self.build_respond_frame(req_id, msgid, reply)
+            logger.info(f"REPLY FRAME: {json.dumps(frame, ensure_ascii=False)}")
             await ws.send(frame)
             logger.info(f"已回复: msgid={msgid}")
 
@@ -260,16 +271,22 @@ class MessageHandler:
 
     async def _handle_event_callback(self, ws, body: dict, req_id: str):
         """处理事件回调"""
-        event_type = body.get("event_type", "")
+        event_type = body.get("event", {}).get("eventtype", "")
         logger.info(f"收到事件: event_type={event_type}")
 
         if event_type == "enter_chat":
-            msgid = body.get("msgid", "")
             welcome = (
                 "你好！我是小雷没摸鱼资源库助手。\n"
                 "直接发送关键词即可搜索资源库，如「产品设计素材」「Python 教程」等。"
             )
-            frame = self.build_respond_frame(req_id, msgid, welcome)
+            frame = json.dumps({
+                "cmd": "aibot_respond_welcome_msg",
+                "headers": {"req_id": req_id},
+                "body": {
+                    "msgtype": "text",
+                    "text": {"content": welcome},
+                },
+            }, ensure_ascii=False)
             await ws.send(frame)
             logger.info("已发送欢迎语")
 
@@ -293,12 +310,12 @@ class WeworkWSClient:
                 if ws and not ws.close_code:
                     try:
                         await ws.send(json.dumps({"cmd": "ping"}))
-                        logger.debug("发送 ping")
+                        logger.info("HB sent")
                     except (ConnectionClosed, WebSocketException):
                         logger.warning("心跳发送失败，连接可能已断开")
                         break
         except asyncio.CancelledError:
-            pass
+            logger.info("Heartbeat task cancelled")
 
     async def message_loop(self, ws):
         """消息接收循环"""
